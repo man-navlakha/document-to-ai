@@ -81,7 +81,7 @@ const Index = () => {
   };
 
   // Example PDF URL for demonstration
-  const examplePdfUrl = "https://mphkxojdifbgafp1.public.blob.vercel-storage.com/QuePdf/Notes/unit-1.pptx-ty4A14EygykZwhllGCxmQJfv8vCYqt.pdf";
+  const examplePdfUrl = "https://mphkxojdifbgafp1.public.blob.vercel-storage.com/QuePdf/Notes/Java%20BCA.pdf";
 
   return (
     <div className="min-h-screen flex flex-col">
