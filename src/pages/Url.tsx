@@ -43,7 +43,7 @@ const Url = () => {
       const pdfName = pdfUrl.split('/').pop() || 'PDF from URL';
       
       // Navigate to the chat page with the source ID and name
-      navigate(`/chat?sourceId=${encodeURIComponent(sourceId)}&name=${encodeURIComponent(pdfName)}`);
+      navigate(`/chat?sourceId=${encodeURIComponent(sourceId)}&name=${(pdfName)}`);
       
     } catch (error) {
       console.error("Error accessing PDF:", error);

@@ -19,6 +19,14 @@ export default {
 			}
 		},
 		extend: {
+			typography: {
+				DEFAULT: {
+					css: {
+						'pre code': {
+							fontFamily: "'Fira Code', monospace",
+						},
+					},},
+				},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

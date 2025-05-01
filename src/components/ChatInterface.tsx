@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +12,7 @@ interface ChatInterfaceProps {
   selectedSource: Source | null;
 }
 
+
 const ChatInterface = ({ selectedSource }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -21,29 +21,23 @@ const ChatInterface = ({ selectedSource }: ChatInterfaceProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Reset chat when source changes
   useEffect(() => {
     setMessages([]);
   }, [selectedSource]);
 
   const formatMessageContent = (content: string, references?: { pageNumber: number }[]) => {
     if (!references) return content;
-
-    // Replace [P1], [P2], etc. with styled references
     let formattedContent = content;
-    references.forEach((ref, index) => {
+    references.forEach((ref) => {
       const pageRef = `[P${ref.pageNumber}]`;
       formattedContent = formattedContent.replace(
         pageRef,
         `<span class="pdf-reference">${pageRef}</span>`
       );
     });
-
     return formattedContent;
   };
 
@@ -51,11 +45,7 @@ const ChatInterface = ({ selectedSource }: ChatInterfaceProps) => {
     e.preventDefault();
     if (!input.trim() || !selectedSource) return;
 
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-    };
-
+    const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -94,61 +84,62 @@ const ChatInterface = ({ selectedSource }: ChatInterfaceProps) => {
   }
 
   return (
-    <div id="chat" className="flex flex-col h-full min-h-[500px] rounded-md border">
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-medium truncate">Chat with: {selectedSource.name}</h3>
-      </div>
-      
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <p>Ask questions about your PDF</p>
-            </div>
-          ) : (
-            messages.map((message, index) => (
+    <div id="chat" className="flex flex-col h-full min-h-[500px] rounded-md bg-[#212121] text-white">
+    {/* Message Area */}
+    <ScrollArea className="flex-1 p-4 overflow-y-auto">
+      <div className="space-y-6">
+        {messages.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            <p>Ask questions about {selectedSource.name}</p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div
+              key={index}
+              className={cn("flex w-full", {
+                "justify-end": message.role === "user",
+                "justify-start": message.role === "assistant",
+              })}
+            >
               <div
-                key={index}
-                className={cn("flex", {
-                  "justify-end": message.role === "user",
-                  "justify-start": message.role === "assistant",
-                })}
+                className={cn(
+                  "w-full max-w-3xl rounded-xl px-4 py-3 whitespace-pre-wrap",
+                  message.role === "user"
+                    ? "bg-blue-600 text-white ml-auto"
+                    : "bg-[#2a2a2a] text-gray-100"
+                )}
               >
                 <div
-                  className={cn("max-w-[80%] rounded-lg px-4 py-2", {
-                    "bg-primary text-primary-foreground": message.role === "user",
-                    "bg-muted": message.role === "assistant",
-                  })}
-                >
-                  <div 
-                    className="message-content"
-                    dangerouslySetInnerHTML={{ 
-                      __html: formatMessageContent(message.content) 
-                    }} 
-                  />
-                </div>
+                  className="message-content prose prose-sm dark:prose-invert"
+                  dangerouslySetInnerHTML={{
+                    __html: formatMessageContent(message.content),
+                  }}
+                />
               </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-
-      <div className="p-4 border-t mt-auto">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question about your PDF..."
-            className="resize-none"
-            disabled={loading}
-          />
-          <Button type="submit" size="icon" disabled={!input.trim() || loading}>
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
       </div>
+    </ScrollArea>
+  
+    {/* Input Area */}
+    <div className="w-full border-t border-gray-700 bg-[#1e1e1e] px-4 py-3 sticky bottom-0 z-10">
+      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+        <Textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask a question about your PDF..."
+          className="resize-none bg-[#2a2a2a] text-white border border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          disabled={loading}
+        />
+        <Button type="submit" size="icon" disabled={!input.trim() || loading}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </form>
     </div>
+  </div>
+  
   );
 };
 

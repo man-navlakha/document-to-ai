@@ -93,7 +93,7 @@ const Index = () => {
               Chat with Your PDF Documents
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Upload your PDF files and ask questions to extract information using the ChatPDF API
+              Upload your PDF files and ask questions to extract information using the assistant AI
             </p>
             
             {/* Quick Access Buttons */}
@@ -149,7 +149,7 @@ const Index = () => {
         <Separator className="my-16" />
         
         <section id="about" className="max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-center">About ChatPDF API</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center">About assistant AI</h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-medium mb-2">PDF Processing</h3>
@@ -176,7 +176,7 @@ const Index = () => {
       <footer className="bg-muted py-8">
         <div className="container text-center">
           <p className="text-sm text-muted-foreground">
-            Built with ChatPDF API | {new Date().getFullYear()}
+            Built with assistant AI | {new Date().getFullYear()}
           </p>
         </div>
       </footer>
