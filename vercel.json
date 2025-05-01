@@ -1,8 +1,15 @@
 {
-    "rewrites": [
-      {
-        "source": "/url/:url",
-        "destination": "/"
-      }
-    ]
-  }
+  "rewrites": [
+    {
+      "source": "/url/:url",
+      "destination": "/"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/url",
+      "destination": "/new-url",
+      "permanent": true
+    }
+  ]
+}
