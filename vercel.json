@@ -1,14 +1,14 @@
 {
   "rewrites": [
     {
-      "source": "/url/:url",
+      "source": "/url",
       "destination": "/"
     }
   ],
   "redirects": [
     {
       "source": "/url",
-      "destination": "/url:url",
+      "destination": "/url",
       "permanent": true
     }
   ]

@@ -135,7 +135,7 @@ console.log(response.content)
     }
   };
 
-  console.log(messages);
+  // console.log(messages);
 
   const predefinedQuestions = [
     "What is the summary of the document?",
@@ -186,7 +186,7 @@ console.log(response.content)
             <span>Back</span>
           </Button>
 
-          <h1 className="text-xl font-semibold text-center w-full text-white">
+          <h1 className="text-xl font-semibold text-center w-full truncate text-white">
             {selectedSource?.name ? `Chat with: ${selectedSource.name}` : "Pixel"}
           </h1>
 
@@ -209,7 +209,7 @@ console.log(response.content)
               <div className="space-y-6">
                 {messages.length === 0 ? (
                   <>
-                  <div className="text-center text-gray-400 py-12">Ask a question about {selectedSource.name}</div>
+                  <div className="text-center text-gray-400 py-12 truncate">Ask a question about {selectedSource.name}</div>
                   
 
                   <div className="p-4 ">
@@ -241,7 +241,7 @@ console.log(response.content)
                         className={cn(
                           "max-w-xl md:max-w-[20rem] lg:max-w-xl px-4 py-3 rounded-2xl shadow-md whitespace-pre-wrap backdrop-blur-sm",
                           message.role === "user"
-                            ? "bg-blue-600 text-white"
+                            ? "bg-blue-600/30 border border-blue-800/60 text-white"
                             : "bg-white/10 text-gray-100 border border-white/10"
                         )}
                       >
@@ -278,7 +278,7 @@ console.log(response.content)
   <Textarea
     value={input}
     onChange={(e) => setInput(e.target.value)}
-    placeholder={`Ask a question about ${selectedSource.name}...`}
+    placeholder={`Ask a question...`}
     className="resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-white"
     disabled={loading}
   />
