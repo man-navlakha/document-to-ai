@@ -8,7 +8,7 @@
   "redirects": [
     {
       "source": "/url",
-      "destination": "/new-url",
+      "destination": "/url",
       "permanent": true
     }
   ]
