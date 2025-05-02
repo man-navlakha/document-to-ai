@@ -273,7 +273,7 @@ console.log(response.content)
           {/* Input Box */}
 <form
   onSubmit={handleSubmit}
-  className="sticky bottom-0 z-10 rounded-md border-t border-white/50 shadow-xl bg-white/10 backdrop-blur-md p-3 flex items-end gap-2"
+  className="sticky bottom-4 z-10 rounded-md border-t border-white/50 shadow-xl bg-white/10 backdrop-blur-md p-3 flex items-end gap-2"
 >
   <Textarea
     value={input}
