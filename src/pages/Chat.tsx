@@ -183,7 +183,7 @@ console.log(response.content)
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       {/* Header */}
-      <div className="w-full sticky top-0 border-b border-white/10 backdrop-blur-md bg-white/10">
+      <div className="w-full sticky top-0 border-b border-white/10 backdrop-blur-md bg-white/10 z-9999">
         <div className="container mx-auto py-4 px-4 flex items-center justify-between">
           {/* <Button variant="ghost" onClick={() => navigate("https:pixelclass.netlify.app")} className="flex items-center space-x-2 text-white hover:bg-white/30 ">
             <ArrowLeft className="w-4 h-4" />
