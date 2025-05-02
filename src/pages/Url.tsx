@@ -57,23 +57,20 @@ const Url = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-muted/20">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      <div className="w-full max-w-md p-6 bg-gradient-to-br from-gray-900/30 via-gray-800/20 to-black/30 text-white rounded-lg shadow-md">
         <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate("/")}
-            className="flex items-center space-x-2"
-          >
+        {/* <Button variant="ghost" onClick={() => navigate('https://pixelclass.netlify.app')} className="flex items-center space-x-2 text-white hover:bg-white/30 ">
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Home</span>
-          </Button>
+            <span>Back</span>
+          </Button> */}
+
         </div>
         
         <h1 className="text-2xl font-bold mb-4">Access PDF by URL</h1>
         
         {!pdfUrl ? (
-          <div className="text-center p-4 bg-orange-100 rounded mb-4">
+          <div className="text-center p-4 bg-orange-100 text-black rounded mb-4">
             <p>No PDF URL detected in the address.</p>
             <p className="text-sm text-muted-foreground mt-2">
               Please use a URL with the format: <br/>

@@ -74,7 +74,7 @@ const ChatInterface = ({ selectedSource }: ChatInterfaceProps) => {
 
   if (!selectedSource) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[400px] p-4 text-center border rounded-md">
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] p-4 text-center border bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white rounded-md">
         <h3 className="text-lg font-medium mb-2">No PDF Selected</h3>
         <p className="text-muted-foreground text-sm mb-4">
           Please upload a PDF or add one by URL to start chatting
