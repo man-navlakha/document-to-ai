@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { chatWithPdf } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Send } from "lucide-react";
+import { Send, Copy } from "lucide-react";
 import { Message, Source } from "@/lib/types";
 
 const Chat = () => {
@@ -14,7 +14,9 @@ const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast()
   const location = useLocation();
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -52,8 +54,6 @@ const Chat = () => {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 };
-
-
 const formatMessageContent = (content: string, references?: { pageNumber: number }[]) => {
   if (!content) return "";
 
@@ -63,24 +63,27 @@ const formatMessageContent = (content: string, references?: { pageNumber: number
   formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (_match, lang, code) => {
     const language = lang || "text";
     const escapedCode = escapeHtml(code);
-    
+
+    // Create the formatted HTML with a "Copy" button
     return `
     <div class="relative bg-[#1e1e1e] rounded-md overflow-hidden mb-4 w-full max-w-full md:max-w-4xl">
-  <div class="flex items-center justify-between text-xs px-4 py-2 bg-[#2d2d2d] text-white font-mono">
-    <span class="lowercase">${language}</span>
-    <div class="flex gap-2">
-      <button class="copy-code-button text-white hover:text-green-400 transition" data-code="${encodeURIComponent(code)}">Copy</button>
+      <div class="flex items-center justify-between text-xs px-4 py-2 bg-[#2d2d2d] text-white font-mono">
+        <span class="lowercase">${language}</span>
+        <div class="flex gap-2">
+          <button class="copy-code-button text-white hover:text-green-400 transition" data-code="${encodeURIComponent(code)}">Copy</button>
+        </div>
+      </div>
+      <div class="overflow-auto">
+        <pre class="p-4 text-sm text-green-400 whitespace-pre-wrap break-words">
+          <code class="language-${language}">${escapedCode}</code>
+        </pre>
+      </div>
     </div>
-  </div>
-  <div class="overflow-auto">
-    <pre class="p-4 text-sm text-green-400 whitespace-pre-wrap break-words"><code class="language-${language}">${escapedCode}</code></pre>
-  </div>
-</div>
-
     `;
   });
-// Format ### headers as h3 titles
-formatted = formatted.replace(/^### (.*)$/gm, `<h3 class="text-xl font-bold text-white mt-4 mb-2">$1</h3>`);
+
+  // Format ### headers as h3 titles
+  formatted = formatted.replace(/^### (.*)$/gm, `<h3 class="text-xl font-bold text-white mt-4 mb-2">$1</h3>`);
 
   // Format bold: **text**
   formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -102,8 +105,23 @@ formatted = formatted.replace(/^### (.*)$/gm, `<h3 class="text-xl font-bold text
   return formatted;
 };
 
-
-
+// Copy text to clipboard
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(decodeURIComponent(text));
+    toast({
+      title: "Copied!",
+      description: "The code has been copied to your clipboard."
+    });
+  } catch (err) {
+    console.error("Failed to copy text", err);
+    toast({
+      title: "Error",
+      description: "Failed to copy the code.",
+      variant: "destructive",
+    });
+  }
+};
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !selectedSource) return;
@@ -178,6 +196,21 @@ console.log(response.content)
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.classList.contains("copy-code-button")) {
+        const code = target.getAttribute("data-code");
+        if (code) {
+          copyToClipboard(code);
+        }
+      }
+    };
+  
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
   
 
   return (
@@ -233,31 +266,82 @@ console.log(response.content)
       </div>
                   </>
                 ) : (
-                  messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={cn("flex", {
-                        "justify-end": message.role === "user",
-                        "justify-start": message.role === "assistant",
-                      })}
-                    >
+                  messages.map((message, index) => {
+                    const isLast = index === messages.length - 1;
+                    const isLastAssistant = isLast && message.role === "assistant";
+                  
+                    return (
                       <div
-                        className={cn(
-                          "max-w-xl md:max-w-[20rem] lg:max-w-xl px-4 py-3 rounded-2xl shadow-md whitespace-pre-wrap backdrop-blur-sm",
-                          message.role === "user"
-                            ? "bg-blue-600/30 border border-blue-800/60 text-white"
-                            : "bg-white/10 text-gray-100 border border-white/10"
-                        )}
+                        key={index}
+                        className={cn("flex flex-col", {
+                          "items-end": message.role === "user",
+                          "items-start": message.role === "assistant",
+                        })}
                       >
                         <div
-                          className="prose dark:prose-invert prose-sm"
-                          dangerouslySetInnerHTML={{
-                            __html: formatMessageContent(message.content),
-                          }}
-                        />
+                          className={cn(
+                            "max-w-xl md:max-w-[20rem] lg:max-w-xl px-4 py-3 rounded-2xl shadow-md whitespace-pre-wrap backdrop-blur-sm",
+                            message.role === "user"
+                              ? "bg-blue-600/30 border border-blue-800/60 text-white"
+                              : "bg-white/10 text-gray-100 border border-white/10"
+                          )}
+                        >
+                          <div
+                            className="prose dark:prose-invert prose-sm"
+                            dangerouslySetInnerHTML={{
+                              __html: formatMessageContent(message.content),
+                            }}
+                          />
+                        </div>
+                  
+                        {/* Regenerate button under last assistant message */}
+                        {isLastAssistant && (
+                          <button
+                            onClick={async () => {
+                              const lastUserMessage = messages.slice().reverse().find(m => m.role === "user");
+                              if (!lastUserMessage || !selectedSource) return;
+                  
+                              setLoading(true);
+                              try {
+                                const previous = messages.slice(0, index - 1);
+                                const response = await chatWithPdf(selectedSource.id, [...previous, lastUserMessage], true);
+                  
+                                const newAssistantMessage: Message = {
+                                  role: "assistant",
+                                  content: response.content,
+                                };
+                  
+                                setMessages([...previous, lastUserMessage, newAssistantMessage]);
+                              } catch (error) {
+                                toast({
+                                  title: "Error",
+                                  description: "Failed to regenerate response.",
+                                  variant: "destructive",
+                                });
+                              } finally {
+                                setLoading(false);
+                              }
+                            }}
+                            className="mt-2 text-xs text-blue-400 hover:text-blue-300"
+                          >
+                            🔁 Regenerate Response
+                          </button>
+
+                        )}
+                           {/* Copy button for code snippets */}
+                  {message.content.includes("`") && (
+                    <Button
+                      variant="ghost"
+                      className="absolute top-2 right-2 text-sm text-gray-300"
+                      onClick={() => copyToClipboard(message.content)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  )}
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
+
                 )}
                {loading && (
   <div className="flex justify-start text-sm text-gray-400 italic animate-pulse px-2 py-3 max-w-xl md:max-w-[20rem] lg:max-w-xl bg-white/10 text-gray-100 border border-white/10  rounded-2xl shadow-md whitespace-pre-wrap backdrop-blur-sm">
@@ -272,28 +356,52 @@ console.log(response.content)
 
 }
   {/* Predefined Questions */}
-     
+  {isTyping && (
+  <p className="text-xs text-gray-400 italic px-2 mt-1">You are typing...</p>
+)}
+
 
           {/* Input Box */}
-<form
+          <form
   onSubmit={handleSubmit}
-  className="sticky bottom-4 z-10 rounded-md border-t border-white/50 shadow-xl bg-white/10 backdrop-blur-md p-3 flex items-end gap-2"
+  className="sticky bottom-4 z-10 rounded-2xl border-t border-white/50 shadow-xl bg-white/10 backdrop-blur-md p-3 flex flex-col gap-1"
 >
-  <Textarea
-    value={input}
-    onChange={(e) => setInput(e.target.value)}
-    placeholder={`Ask a question...`}
-    className="resize-none bg-transparent border-none focus:outline-none focus:ring-0 text-white"
-    disabled={loading}
-  />
-  <Button
-    type="submit"
-    size="icon"
-    className="bg-blue-600 hover:bg-blue-700 text-white"
-    disabled={!input.trim() || loading}
-  >
-    <Send className="h-4 w-4" />
-  </Button>
+  <div className="flex items-end gap-2">
+    <Textarea
+      value={input}
+      onChange={(e) => {
+        setInput(e.target.value);
+        setIsTyping(true);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+        }, 1000);
+      }}
+      
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && e.ctrlKey) {
+          e.preventDefault();
+          handleSubmit(e as any);
+        }
+      }}
+      placeholder={`Ask a question...`}
+      className="resize-none bg-transparent border-none rounded-xl focus:outline-none focus:ring-0 text-white"
+      disabled={loading}
+    />
+    <Button
+      type="submit"
+      size="icon"
+      className="bg-blue-600 hover:bg-blue-700 text-white"
+      disabled={!input.trim() || loading}
+    >
+      <Send className="h-4 w-4" />
+    </Button>
+  </div>
+  <p className="text-xs text-gray-400 px-2 mt-1">
+    Press <kbd className="bg-gray-700 px-1 rounded">Ctrl</kbd> + <kbd className="bg-gray-700 px-1 rounded">Enter</kbd> to send, <kbd className="bg-gray-700 px-1 rounded">Enter</kbd> for newline.
+  </p>
 </form>
 
           </>
